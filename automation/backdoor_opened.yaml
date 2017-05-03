@@ -1,0 +1,13 @@
+# Back Door state changed..
+  alias: 'Back Door State Change detection'
+  hide_entity: False
+  trigger:
+    platform: state
+    entity_id: binary_sensor.back_door_sensor_opened
+    state: 'on'
+  action:
+    service: ifttt.trigger
+    data_template:
+      event: "TestHomeAssistant_Trigger"
+      value1: "BackDoor opened"
+      value2: "State: {{ states.binary_sensor.back_door_sensor_opened.state }}"

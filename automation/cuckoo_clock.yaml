@@ -1,0 +1,61 @@
+###################################
+##  cuckoo Clock simulation. --- based on @CCOSTAN
+## Plays the number of cuckoos per hour and 1 on the half hour.
+###################################
+
+  alias: Cuckoo Clock
+  trigger:
+    - platform: time
+      minutes: 00
+      seconds: 20
+    - platform: time
+      minutes: 30
+      seconds: 00
+
+  condition:
+    - condition: time
+      after: '09:30:00'
+      before: '20:30:00'
+    - condition: state
+      entity_id: input_boolean.guest_mode
+      state: 'off'
+    - condition: template
+      value_template: >
+        {% if is_state('media_player.bluetooth_speaker', 'playing') %}
+          false
+        {% else %}
+          true
+        {% endif %}
+  action:
+    # Turn the power on.
+    - service: switch.turn_on
+      entity_id: switch.humidifier
+    # Delay for 20 seconds, for Amp and Chromcastto turn on
+    - delay: '00:00:20'
+
+    - service: media_player.turn_on
+      entity_id: media_player.bluetooth_speaker
+
+    - service: media_player.volume_set
+      entity_id:
+        - media_player.bluetooth_speaker
+      data:
+        volume_level: 0.5
+
+    - service: media_player.play_media
+      data_template:
+        entity_id:
+          - media_player.bluetooth_speaker
+        media_content_id: >
+          {% if now().strftime("%M")|int == 30 %}
+          https://raw.githubusercontent.com/rosahas/home-assistant-config/master/sounds/cuckoo-clock-01.wav
+          {% else %}
+          https://raw.githubusercontent.com/rosahas/home-assistant-config/master/sounds/cuckoo-clock-{{now().strftime("%I")}}.wav
+          {% endif %}
+        media_content_type: audio/mp4
+
+    # Turn the power OFF.
+    # Delay for 1 minute for everything to turn run and then turn off
+    - delay: '00:01:00'
+    - service: switch.turn_off
+      entity_id: switch.humidifier

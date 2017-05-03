@@ -1,0 +1,228 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: RosPi
+  # Location required to calculate the time the sun rises and sets
+  latitude: !secret homeassistant_latitude
+  longitude: !secret homeassistant_longitude
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: !secret homeassistant_elevation
+  # metric for Metric, imperial for Imperial
+  unit_system: imperial
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: America/Chicago
+
+  customize: !include_dir_merge_named customize
+
+# Show links to resources in log and frontend
+introduction:
+
+# logging
+logger:
+  default: warn
+  logs:
+   homeassistant.components.api: warn
+   homeassistant.components.cover.garadget: warn
+
+# Enables the frontend
+frontend:
+
+# Enable onkyo receiver
+media_player:
+  - platform: onkyo
+    host: !secret onkyo_ip
+    name: living_room_receiver
+    # sources:
+      # Game: 'AppleTVLivingRoom'
+
+#Living Room Apple TV:
+  # - platform: apple_tv
+  #   name: Living Room Apple TV
+  #   host: !secret living_room_apple_tv_ip
+  #   login_id: !secret apple_tv_login_id
+# # Game room Apple TV
+  # - platform: apple_tv
+  #   name: Game Room Apple TV
+  #   host: !secret game_room_apple_tv_ip
+  #   login_id: !secret apple_tv_login_id
+
+# Living Room Chromecast
+  - platform: cast
+    # host:  !secret living_roomCC_ip
+    # name:  living_roomCC
+
+# Samsung TV - UN55C8000
+  - platform: samsungtv
+    host: !secret samsung_tv_ip
+
+
+http:
+  # Uncomment this to add a password (recommended!)
+  api_password: !secret http_api_password
+  server_port:  !secret http_server_port
+  ip_ban_enabled: True
+  login_attempts_threshold: 5
+  # Uncomment this if you are using SSL or running in Docker etc
+  base_url: !secret http_base_url
+  ssl_certificate:  !secret http_ssl_certificate
+  ssl_key:  !secret http_ssl_key
+
+# Checks for available updates
+updater:
+
+# Discover some devices automatically
+discovery:
+  ignore:
+    - apple_tv
+    - samsung_tv
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+# Enables support for tracking state changes over time.
+history:
+  exclude:
+    entities:
+      - cover.sahas_garage_door
+
+# View all events in a logbook
+logbook:
+  exclude:
+    entities:
+      - sensor.garage_door_time_in_state
+      - sensor.garage_door_wifi_signal_strength
+      - sensor.garage_door_laser_rate_state
+
+light:
+# Lights .. for LED Strip lights
+  - platform: flux_led
+    automatic_add: False
+    devices:
+      !secret living_room_led_strip_ip:
+        name: living_room_led_strip
+        mode: rgbw
+      !secret kitchen_sink_magic_light_ip:
+        name: kitchen_sink_magic_light
+      !secret master_bathroom_magic_light_ip:
+        name: master_bathroom_magic_light
+      !secret right_cabinet_led_strip_ip:
+        name: right_cabinet_led_strip
+        mode: rgbw
+      !secret left_cabinet_led_strip_ip:
+        name: left_cabinet_led_strip
+        mode: rgbw
+      !secret coffee_cabinet_led_strip_ip:
+        name: coffee_cabinet_led_strip
+        mode: rgbw
+
+
+emulated_hue:
+  host_ip: !secret emulated_hue_ip
+  # listen_port: 8300
+  # advertise_ip: 10.0.0.10
+  # advertise_port: 8080
+  # off_maps_to_on_domains:
+  #   - script
+  #   - scene
+  expose_by_default: false
+  exposed_domains:
+    - input_boolean
+    - light
+    - media_player
+    - switch
+
+# Track the sun
+sun:
+
+sensor: !include_dir_list sensor/
+
+ifttt:
+  key: !secret ifttt_key
+
+ifttt2:
+  key: !secret ifttt2_key
+
+automation: !include_dir_list automation/
+
+# Garage door light on script
+script: !include_dir_merge_named script/
+
+# My scenes
+scene: !include_dir_list scene/
+
+# Example configuration.yaml entry
+cover:
+  platform: garadget
+  covers:
+    !secret garadget_door_id:
+      # access_token: !secret garadget_access_token
+      username:  !secret garadget_user_name
+      password:  !secret garadget_password
+      name:  Sahas Garage Door
+
+group: !include_dir_merge_named group/
+  # garage_door:
+  #   name: Garage door
+  #   entities:
+  #     - cover.garage_door
+  #     - sensor.garage_door_status
+  #     - sensor.garage_door_time_in_state
+  #     - sensor.garage_door_wifi_signal_strength
+  #     - sensor.garage_door_laser_rate_state
+  #
+  # daily_night_auto_lights:
+  #   name: Daily Night Automatic lights
+  #   entities:
+  #     - light.garagedoor_lights
+  #     - light.frontdoor_lights
+  #     - light.stairways_light
+  #
+  # indoor_lights:
+  #   name: Indoor lights to turn on at night when garage opens
+  #   entities:
+  #     - light.hallway_lights
+  #     - light.living_room_light
+  #     - light.stairways_light
+  #     - light.upstairs_lights
+
+input_boolean: !include_dir_merge_named input_boolean
+
+# Delete logs older than 3 days.
+recorder:
+  purge_days: 2
+
+# Android IP Cameras
+# android_ip_webcam:
+  # - host: !secret Droid4_ip
+    # scan_interval: 20
+    # name: Droid4_IPCam
+    # username: !secret Droid4_user
+    # password: !secret Droid4_pwd
+# #    motion_sensor: true
+    # sensors:
+      # - audio_connections
+      # - battery_level
+      # - light
+      # - motion
+      # - pressure
+
+# Text to speech
+tts:
+  platform: google
+
+switch:
+  - platform: tplink
+    host: !secret garage_light_ip
+    name: Garage Light
+
+mqtt:
+  broker: 127.0.0.1
+  port: 1883
+  client_id: home-assistant-1
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+
+wink:
+  email: !secret wink_email
+  password: !secret wink_password
+  client_id: !secret wink_client_id
+  client_secret: !secret wink_client_secret

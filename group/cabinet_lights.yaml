@@ -1,0 +1,6 @@
+  cabinet_lights:
+    name: Cabinet Lights (under)
+    entities:
+      - light.coffee_cabinet_led_strip
+      - light.left_cabinet_led_strip
+      - light.right_cabinet_led_strip

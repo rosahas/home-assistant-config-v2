@@ -1,0 +1,11 @@
+  alias: Shutdown Notification
+  trigger:
+    platform: event
+    event_type: homeassistant_stop
+  action:
+    service: ifttt.trigger
+    data_template:
+      event: "TestHomeAssistant_Trigger"
+      value1: "Home Assistant Stopped"
+      value2: " "
+    # data: {"event":"TestHomeAssistant_Trigger", "value1":"Home Assistant Stopped"}

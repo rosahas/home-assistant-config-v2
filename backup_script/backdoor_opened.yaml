@@ -1,0 +1,10 @@
+# Garage door light on script
+  backdoor_opened:
+    sequence:
+    - service: logbook.log
+      data:
+        name: "BackDoor opened"
+        message: "Someone has openned the back door."
+
+    - service: ifttt.trigger
+    data_template: {"event":"GarageLightChange", "value1":"Garage Lights", "value2": "{{ trigger.to_state.state }}"}
